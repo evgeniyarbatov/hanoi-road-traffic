@@ -52,9 +52,8 @@ roads:
 	ogr2ogr -f GeoJSON $(OSM_DIR)/hanoi-main-near-pedestrian.geojson \
 			$(OSM_DIR)/hanoi.sqlite \
 			-dialect sqlite \
-			-sql "SELECT m.* FROM hanoi_main_roads m JOIN hanoi_pedestrian p ON ST_Distance(m.geometry, p.geometry) < 10"
+			-sql "SELECT m.* FROM hanoi_main_roads m JOIN hanoi_pedestrian p ON ST_Distance(m.geometry, p.geometry, 'Meter') < 10"
 
-	ogr2ogr -f "OSM" $(OSM_DIR)/hanoi-main-near-pedestrian.osm \
-	$(OSM_DIR)/hanoi-main-near-pedestrian.geojson
+	geojsontoosm $(OSM_DIR)/hanoi-main-near-pedestrian.geojson $(OSM_DIR)/hanoi-main-near-pedestrian.osm   
 
 
