@@ -1,2 +1,3 @@
 # hanoi-road-traffic
-Querying Tomtom Traffic API to understand Hanoi traffic patterns
+
+The goal is to know exactly what roads are busy and when so I can plan my runs better.
