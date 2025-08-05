@@ -29,8 +29,9 @@ city:
 	--overwrite
 
 	osmium tags-filter $(OSM_DIR)/hanoi.osm.pbf \
-	w/highway=footway,pedestrian,path,cycleway,steps \
-	w/foot=yes \
+	w/highway=footway \
+	w/highway=pedestrian \
+	w/highway=steps \
 	-o $(OSM_DIR)/hanoi-pedestrian.osm.pbf \
 	--overwrite
 
