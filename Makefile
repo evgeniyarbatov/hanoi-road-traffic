@@ -45,14 +45,25 @@ roads:
 	osmium export --overwrite $(OSM_DIR)/hanoi-pedestrian.osm.pbf \
 	-o $(OSM_DIR)/hanoi-pedestrian.geojson
 
-	ogr2ogr -f SQLite $(OSM_DIR)/hanoi.sqlite osm/hanoi-main-roads.geojson -nln hanoi_main_roads
-	ogr2ogr -f SQLite $(OSM_DIR)/hanoi.sqlite osm/hanoi-pedestrian.geojson -nln hanoi_pedestrian -update
+	rm -f $(OSM_DIR)/hanoi.sqlite
 
-	rm $(OSM_DIR)/hanoi-main-near-pedestrian.geojson
-	ogr2ogr -f GeoJSON $(OSM_DIR)/hanoi-main-near-pedestrian.geojson \
-			$(OSM_DIR)/hanoi.sqlite \
-			-dialect sqlite \
-			-sql "SELECT m.* FROM hanoi_main_roads m JOIN hanoi_pedestrian p ON ST_Distance(m.geometry, p.geometry, 'Meter') < 10"
+	ogr2ogr -f SQLite -dsco SPATIALITE=YES \
+	$(OSM_DIR)/hanoi.sqlite \
+	$(OSM_DIR)/hanoi-main-roads.geojson \
+	-nln hanoi_main_roads \
+	-lco GEOMETRY_NAME=geometry
+
+	ogr2ogr -f SQLite -dsco SPATIALITE=YES \
+	$(OSM_DIR)/hanoi.sqlite \
+	$(OSM_DIR)/hanoi-pedestrian.geojson \
+	-nln hanoi_pedestrian \
+	-lco GEOMETRY_NAME=geometry \
+	-update
+
+	ogr2ogr -f GeoJSON osm/hanoi-main-near-pedestrian.geojson \
+	$(OSM_DIR)/hanoi.sqlite \
+	-dialect sqlite \
+	-sql "SELECT m.* FROM hanoi_main_roads m JOIN hanoi_pedestrian p ON ST_Distance(m.geometry, p.geometry) < 10"
 
 	geojsontoosm $(OSM_DIR)/hanoi-main-near-pedestrian.geojson $(OSM_DIR)/hanoi-main-near-pedestrian.osm   
 
