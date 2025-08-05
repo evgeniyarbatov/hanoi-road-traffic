@@ -60,11 +60,12 @@ roads:
 	-lco GEOMETRY_NAME=geometry \
 	-update
 
-	ogr2ogr -f GeoJSON osm/hanoi-main-near-pedestrian.geojson \
+	rm -f $(OSM_DIR)/hanoi-main-near-pedestrian.geojson
+	ogr2ogr -f GeoJSON $(OSM_DIR)/hanoi-main-near-pedestrian.geojson \
 	$(OSM_DIR)/hanoi.sqlite \
 	-dialect sqlite \
-	-sql "SELECT m.* FROM hanoi_main_roads m JOIN hanoi_pedestrian p ON ST_Distance(m.geometry, p.geometry) < 10"
+	-sql "SELECT m.* FROM hanoi_main_roads m WHERE EXISTS (SELECT 1 FROM hanoi_pedestrian p WHERE ST_Distance(m.geometry, p.geometry) < 10)"
 
-	geojsontoosm $(OSM_DIR)/hanoi-main-near-pedestrian.geojson $(OSM_DIR)/hanoi-main-near-pedestrian.osm   
+	geojsontoosm $(OSM_DIR)/hanoi-main-near-pedestrian.geojson > $(OSM_DIR)/hanoi-main-near-pedestrian.osm   
 
 
