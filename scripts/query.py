@@ -18,7 +18,7 @@ if not TOMTOM_API_KEY:
 # === DATABASE CONFIG ===
 DB_CONFIG = {
     'dbname': 'traffic',
-    'user': 'root',
+    'user': 'traffic',
     'password': 'DKW9b9agY23e',
     'host': 'localhost',
     'port': 5432
