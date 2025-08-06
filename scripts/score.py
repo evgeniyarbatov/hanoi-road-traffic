@@ -88,9 +88,18 @@ def analyze_running_routes_from_osm(osm_file_path, buffer_distance=50):
     nearby_peds['running_score'] = nearby_peds.apply(calculate_running_score, axis=1)
     
     # Group by road to get best pedestrian option per road
+    print(nearby_peds.columns)
+    
+    def normalize_osmid(val):
+        if isinstance(val, list):
+            return val[0]  # or `','.join(map(str, val))` if you want to keep all IDs
+        return val
+
+    nearby_peds['osmid'] = nearby_peds['osmid'].apply(normalize_osmid)
+    
     best_running_roads = (nearby_peds
                          .sort_values('running_score', ascending=False)
-                         .groupby('osmid_road')
+                         .groupby('osmid')
                          .first()
                          .reset_index())
     
@@ -188,7 +197,7 @@ def export_results(results_gdf, output_file='hanoi_running_roads.geojson'):
     """Export results to GeoJSON for use in other tools"""
     if results_gdf is not None and len(results_gdf) > 0:
         # Select relevant columns
-        export_cols = ['osmid_road', 'highway_road', 'name_road', 'ped_distance', 
+        export_cols = ['osmid', 'highway__road', 'name', 'ped_distance', 
                       'running_score', 'geometry']
         export_cols = [col for col in export_cols if col in results_gdf.columns]
         

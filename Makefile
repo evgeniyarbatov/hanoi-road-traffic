@@ -38,12 +38,25 @@ city:
 		--complete-ways \
 		--complete-multipolygons \
 		-o=$(OSM_DIR)/hanoi.osm.pbf
-
 	osmium cat --overwrite $(OSM_DIR)/hanoi.osm.pbf -o $(OSM_DIR)/hanoi.osm; 
+
+	osmium tags-filter $(OSM_DIR)/hanoi.osm.pbf \
+		w/highway=motorway,primary,secondary \
+		-o $(OSM_DIR)/hanoi-roads.osm.pbf \
+		--overwrite
+	osmium cat --overwrite $(OSM_DIR)/hanoi-roads.osm.pbf -o $(OSM_DIR)/hanoi-roads.osm; 
 
 score:
 	source $(VENV_PATH)/bin/activate && \
 	python3.11 scripts/score.py
+
+centrality:
+	source $(VENV_PATH)/bin/activate && \
+	python3.11 scripts/centrality.py
+
+metrics:
+	source $(VENV_PATH)/bin/activate && \
+	python3.11 scripts/metrics.py
 
 query:
 	source $(VENV_PATH)/bin/activate && \
