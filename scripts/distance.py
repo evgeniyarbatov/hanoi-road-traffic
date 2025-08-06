@@ -43,7 +43,7 @@ def main(
         axis=1
     )
     
-    df.to_csv(output_filename, index=False)
+    df[['way_id', 'distance']].to_csv(output_filename, index=False)
 
 if __name__ == "__main__":
     main(*sys.argv[1:])
