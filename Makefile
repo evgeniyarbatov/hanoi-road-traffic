@@ -7,6 +7,9 @@ COUNTRY_OSM_FILE = $$(basename $(URL))
 OSM_DIR = osm
 DATA_DIR = data
 
+START_LAT = 20.994847371543745
+START_LON = 105.86769532886133
+
 all: venv install
 
 venv:
@@ -82,14 +85,20 @@ roads:
 
 	osmium renumber -o $(OSM_DIR)/hanoi-main-near-pedestrian-renumbered.osm  $(OSM_DIR)/hanoi-main-near-pedestrian.osm  
 
+query:
+	source $(VENV_PATH)/bin/activate && \
+	python3.11 scripts/query.py \
+	--osm $(OSM_DIR)/hanoi-main-near-pedestrian-renumbered.osm \
+
 ways:
 	source $(VENV_PATH)/bin/activate && \
 	python3.11 scripts/ways.py \
 	$(OSM_DIR)/hanoi-main-near-pedestrian-renumbered.osm \
 	$(DATA_DIR)/ways.csv
 
-query:
+filter:
 	source $(VENV_PATH)/bin/activate && \
-	python3.11 scripts/query.py \
-	--osm $(OSM_DIR)/hanoi-main-near-pedestrian-renumbered.osm \
-
+	python3.11 scripts/filter.py \
+	$(START_LAT) \
+	$(START_LON) \
+	$(DATA_DIR)/ways.csv;
