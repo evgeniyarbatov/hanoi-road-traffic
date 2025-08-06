@@ -237,8 +237,8 @@ if __name__ == "__main__":
         print(f"\nTop 10 roads by running score:")
         top_roads = results.nlargest(10, 'running_score')
         for idx, road in top_roads.iterrows():
-            road_name = road.get('name_left', 'Unnamed')
-            highway_type = road.get('highway_left', 'unknown')
+            road_name = road.get('name_road', 'Unnamed')
+            highway_type = road.get('highway_road', 'unknown')
             score = road.get('running_score', 0)
             distance = road.get('ped_distance', 0)
             print(f"- {road_name} ({highway_type}): Score {score:.1f}, "
