@@ -57,8 +57,7 @@ def analyze_running_routes_from_osm(osm_file_path, buffer_distance=50):
     
     # Filter for major roads suitable for monitoring traffic
     major_roads = roads_gdf[
-        roads_gdf['highway'].isin(['primary', 'secondary', 'trunk', 'tertiary', 
-                                  'primary_link', 'secondary_link', 'trunk_link'])
+        roads_gdf['highway'].isin(['primary', 'secondary', 'motorway'])
     ].copy()
     
     print(f"Found {len(major_roads)} major roads")
