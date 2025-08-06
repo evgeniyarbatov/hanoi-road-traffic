@@ -7,8 +7,10 @@ COUNTRY_OSM_FILE = $$(basename $(URL))
 OSM_DIR = osm
 DATA_DIR = data
 
+RADIUS_KM = 30
 START_LAT = 20.994847371543745
 START_LON = 105.86769532886133
+CIRCLE = osm/circle.poly
 
 all: venv install
 
@@ -32,9 +34,17 @@ country:
 		wget $(URL) -P $(OSM_DIR); \
 	fi
 
+circle:
+	@source $(VENV_PATH)/bin/activate && \
+	python3.11 scripts/get-circle.py \
+	$(START_LAT) \
+	$(START_LON) \
+	$(RADIUS_KM) \
+	$(CIRCLE);
+
 city:
 	osmconvert $(OSM_DIR)/$(COUNTRY_OSM_FILE) \
-		-B=$(OSM_DIR)/hanoi.poly \
+		-B=$(CIRCLE) \
 		--complete-ways \
 		--complete-multipolygons \
 		-o=$(OSM_DIR)/hanoi.osm.pbf

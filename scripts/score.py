@@ -103,6 +103,12 @@ def analyze_running_routes_from_osm(osm_file_path, buffer_distance=50):
                          .first()
                          .reset_index())
     
+    best_running_roads = gpd.GeoDataFrame(
+        best_running_roads,
+        geometry='geometry',
+        crs=utm_crs  # the UTM CRS you used earlier
+    )
+
     # Convert back to WGS84 for output
     result = best_running_roads.to_crs('EPSG:4326')
     
