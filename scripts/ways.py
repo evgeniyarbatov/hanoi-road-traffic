@@ -10,22 +10,26 @@ class WayHandler(osmium.SimpleHandler):
 
     def way(self, w):
         try:
+            highway_value = w.tags.get("highway")
+            if highway_value is None:
+                return  # Skip ways without highway tag
+
             coords = [(n.lon, n.lat) for n in w.nodes]
             if len(coords) >= 2:
                 line = LineString(coords)
                 midpoint = line.interpolate(0.5, normalized=True)
                 lat, lon = float(midpoint.y), float(midpoint.x)
-                self.way_midpoints.append((w.id, lat, lon))
+                self.way_midpoints.append((w.id, lat, lon, highway_value))
         except Exception as e:
             print("Error processing way:", e)
 
 def write_midpoints_to_csv(way_midpoints, filename):
     with open(filename, mode='w', newline='', encoding='utf-8') as csvfile:
         writer = csv.writer(csvfile)
-        writer.writerow(['way_id', 'lat', 'lon'])  # header
+        writer.writerow(['way_id', 'lat', 'lon', 'highway'])  # updated header
 
-        for way_id, lat, lon in way_midpoints:
-            writer.writerow([way_id, lat, lon])
+        for way_id, lat, lon, highway in way_midpoints:
+            writer.writerow([way_id, lat, lon, highway])
 
 def main():
     parser = argparse.ArgumentParser(description="Extract OSM way midpoints to CSV")
@@ -37,7 +41,7 @@ def main():
     print(f"Processing OSM file: {args.osm_file}")
     handler.apply_file(args.osm_file, locations=True)
 
-    print(f"Total ways processed: {len(handler.way_midpoints)}")
+    print(f"Total ways with 'highway' tag processed: {len(handler.way_midpoints)}")
     print(f"Writing midpoints to CSV: {args.csv_file}")
     write_midpoints_to_csv(handler.way_midpoints, args.csv_file)
 
