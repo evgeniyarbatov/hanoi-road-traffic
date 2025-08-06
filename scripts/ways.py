@@ -1,41 +1,45 @@
 import osmium
 import csv
 import argparse
+from shapely.geometry import LineString
 
 class WayHandler(osmium.SimpleHandler):
     def __init__(self):
         super(WayHandler, self).__init__()
-        self.ways = []
+        self.way_midpoints = []
 
     def way(self, w):
         try:
             coords = [(n.lon, n.lat) for n in w.nodes]
             if len(coords) >= 2:
-                self.ways.append((w.id, coords))  # store way ID with coords
+                line = LineString(coords)
+                midpoint = line.interpolate(0.5, normalized=True)
+                lat, lon = float(midpoint.y), float(midpoint.x)
+                self.way_midpoints.append((w.id, lat, lon))
         except Exception as e:
             print("Error processing way:", e)
 
-def write_ways_to_csv(ways, filename):
+def write_midpoints_to_csv(way_midpoints, filename):
     with open(filename, mode='w', newline='', encoding='utf-8') as csvfile:
         writer = csv.writer(csvfile)
-        writer.writerow(['way_id', 'coordinates'])  # header
+        writer.writerow(['way_id', 'lat', 'lon'])  # header
 
-        for way_id, coords in ways:
-            coord_str = ';'.join(f"{lon},{lat}" for lon, lat in coords)
-            writer.writerow([way_id, coord_str])
+        for way_id, lat, lon in way_midpoints:
+            writer.writerow([way_id, lat, lon])
 
 def main():
-    parser = argparse.ArgumentParser(description="Extract OSM ways to CSV")
+    parser = argparse.ArgumentParser(description="Extract OSM way midpoints to CSV")
     parser.add_argument("osm_file", help="Input OSM file (e.g., map.osm)")
-    parser.add_argument("csv_file", help="Output CSV file (e.g., ways.csv)")
+    parser.add_argument("csv_file", help="Output CSV file (e.g., midpoints.csv)")
     args = parser.parse_args()
 
     handler = WayHandler()
     print(f"Processing OSM file: {args.osm_file}")
     handler.apply_file(args.osm_file, locations=True)
 
-    print(f"Writing {len(handler.ways)} ways to CSV: {args.csv_file}")
-    write_ways_to_csv(handler.ways, args.csv_file)
+    print(f"Total ways processed: {len(handler.way_midpoints)}")
+    print(f"Writing midpoints to CSV: {args.csv_file}")
+    write_midpoints_to_csv(handler.way_midpoints, args.csv_file)
 
 if __name__ == "__main__":
     main()
