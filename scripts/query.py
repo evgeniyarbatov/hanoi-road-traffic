@@ -124,7 +124,7 @@ def main():
     for i, coords in enumerate(handler.ways, 1):
         line = LineString(coords)
         midpoint = line.interpolate(0.5, normalized=True)
-        lat, lon = midpoint.y, midpoint.x
+        lat, lon = float(midpoint.y), float(midpoint.x) 
 
         response = call_tomtom_api(lat, lon, cache)
         if response:

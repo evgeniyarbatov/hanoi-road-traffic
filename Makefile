@@ -77,11 +77,13 @@ roads:
 
 	geojsontoosm $(OSM_DIR)/hanoi-main-near-pedestrian.geojson \
 	| xmllint --format - \
-	> $(OSM_DIR)/hanoi-main-near-pedestrian.osm   
+	> $(OSM_DIR)/hanoi-main-near-pedestrian.osm  
+
+	osmium renumber -o $(OSM_DIR)/hanoi-main-near-pedestrian-renumbered.osm  $(OSM_DIR)/hanoi-main-near-pedestrian.osm  
 
 query:
 	source $(VENV_PATH)/bin/activate && \
 	python3.11 scripts/query.py \
-	--osm osm/hanoi-main-near-pedestrian.osm \
+	--osm $(OSM_DIR)/hanoi-main-near-pedestrian-renumbered.osm \
 	--cache cache/cache.json
 
