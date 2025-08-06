@@ -96,9 +96,14 @@ ways:
 	$(OSM_DIR)/hanoi-main-near-pedestrian-renumbered.osm \
 	$(DATA_DIR)/ways.csv
 
-filter:
+sample:
 	source $(VENV_PATH)/bin/activate && \
-	python3.11 scripts/filter.py \
+	python3.11 scripts/sample.py \
+	$(DATA_DIR)/ways.csv;
+
+distance:
+	source $(VENV_PATH)/bin/activate && \
+	python3.11 scripts/distance.py \
 	$(START_LAT) \
 	$(START_LON) \
 	$(DATA_DIR)/ways.csv;
