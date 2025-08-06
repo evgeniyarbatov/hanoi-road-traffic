@@ -23,7 +23,6 @@ DB_CONFIG = {
     'host': 'localhost',
     'port': 5432
 }
-MAX_CALLS_PER_DAY = 50000
 API_URL = 'https://api.tomtom.com/traffic/services/4/flowSegmentData/absolute/10/json'
 
 # === OSM HANDLER ===
@@ -40,29 +39,9 @@ class WayHandler(osmium.SimpleHandler):
         except Exception as e:
             print("Error processing way:", e)
 
-# === CACHE ===
-def load_cache(cache_file):
-    if os.path.exists(cache_file):
-        with open(cache_file, 'r') as f:
-            data = json.load(f)
-            today = datetime.date.today().isoformat()
-            if data.get("date") == today:
-                return data
-    return {"date": datetime.date.today().isoformat(), "calls": 0, "data": {}}
-
-def save_cache(cache, cache_file):
-    with open(cache_file, 'w') as f:
-        json.dump(cache, f)
-
 # === API CALL ===
-def call_tomtom_api(lat, lon, cache):
+def call_tomtom_api(lat, lon):
     key = f"{round(lat, 5)}_{round(lon, 5)}"
-    if key in cache['data']:
-        return cache['data'][key]
-
-    if cache['calls'] >= MAX_CALLS_PER_DAY:
-        print("API call limit reached")
-        return None
 
     params = {
         'point': f'{lat},{lon}',
@@ -74,8 +53,6 @@ def call_tomtom_api(lat, lon, cache):
         r = requests.get(API_URL, params=params)
         r.raise_for_status()
         data = r.json()
-        cache['data'][key] = data
-        cache['calls'] += 1
         return data
     except Exception as e:
         print(f"API error for {lat},{lon}: {e}")
@@ -112,6 +89,28 @@ def save_to_postgis(data, lat, lon):
         conn.close()
     except Exception as e:
         print("Database error:", e)
+        
+def point_exists_in_db(lat, lon):
+    try:
+        conn = psycopg2.connect(**DB_CONFIG)
+        cur = conn.cursor()
+
+        cur.execute("""
+            SELECT EXISTS (
+                SELECT 1
+                FROM traffic
+                WHERE ROUND(lat::numeric, 5) = ROUND(%s::numeric, 5)
+                  AND ROUND(lon::numeric, 5) = ROUND(%s::numeric, 5)
+            );
+        """, (lat, lon))
+
+        exists = cur.fetchone()[0]
+        cur.close()
+        conn.close()
+        return exists
+    except Exception as e:
+        print("Database check error:", e)
+        return False
 
 # === MAIN FUNCTION ===
 def main():
@@ -133,32 +132,26 @@ def main():
     total_ways = len(handler.ways)
     print(f"Total ways found: {total_ways}")
 
-    # Load cache
-    cache = load_cache(cache_file)
-
     for i, coords in enumerate(handler.ways, 1):
         line = LineString(coords)
         midpoint = line.interpolate(0.5, normalized=True)
         lat, lon = float(midpoint.y), float(midpoint.x) 
-
-        response = call_tomtom_api(lat, lon, cache)
-        if response:
-            save_to_postgis(response, lat, lon)
 
         # Display progress every 100 ways or on last one
         if i % 100 == 0 or i == total_ways:
             percent = round((i / total_ways) * 100, 2)
             print(f"Processing way {i} of {total_ways} ({percent}%)")
 
-    # Save updated cache
-    save_cache(cache, cache_file)
+        if point_exists_in_db(lat, lon):
+            continue  # Skip if already exists
+
+        response = call_tomtom_api(lat, lon)
+        if response:
+            save_to_postgis(response, lat, lon)
 
     end_time = time.time()
     elapsed = end_time - start_time
     print(f"Total processing time: {time.strftime('%H:%M:%S', time.gmtime(elapsed))}")
-
-    # Save updated cache
-    save_cache(cache, cache_file)
 
 if __name__ == "__main__":
     main()
