@@ -79,11 +79,9 @@ roads:
 	| xmllint --format - \
 	> $(OSM_DIR)/hanoi-main-near-pedestrian.osm   
 
-
 query:
 	source $(VENV_PATH)/bin/activate && \
-	python3 scripts/query.py \
+	python3.11 scripts/query.py \
 	--osm osm/hanoi-main-near-pedestrian.osm \
-	--cache/cache.json
-
+	--cache cache/cache.json
 
