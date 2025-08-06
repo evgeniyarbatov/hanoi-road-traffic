@@ -87,16 +87,13 @@ def analyze_running_routes_from_osm(osm_file_path, buffer_distance=50):
     # Calculate running suitability scores
     nearby_peds['running_score'] = nearby_peds.apply(calculate_running_score, axis=1)
     
-    # Group by road to get best pedestrian option per road
-    print(nearby_peds.columns)
-    
     def normalize_osmid(val):
         if isinstance(val, list):
             return val[0]  # or `','.join(map(str, val))` if you want to keep all IDs
         return val
-
     nearby_peds['osmid'] = nearby_peds['osmid'].apply(normalize_osmid)
     
+    # Group by road to get best pedestrian option per road 
     best_running_roads = (nearby_peds
                          .sort_values('running_score', ascending=False)
                          .groupby('osmid')
