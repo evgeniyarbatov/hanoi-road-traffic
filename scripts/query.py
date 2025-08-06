@@ -1,6 +1,5 @@
 import time
 import osmium
-import datetime
 import json
 import os
 import psycopg2
@@ -116,11 +115,9 @@ def point_exists_in_db(lat, lon):
 def main():
     parser = argparse.ArgumentParser(description="Process OSM file and call TomTom API")
     parser.add_argument("--osm", required=True, help="Path to the OSM file")
-    parser.add_argument("--cache", required=True, help="Path to the cache file")
     args = parser.parse_args()
 
     osm_file = args.osm
-    cache_file = args.cache
 
     start_time = time.time()  # ⏱ Start timer
 

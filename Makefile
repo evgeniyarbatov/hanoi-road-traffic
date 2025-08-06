@@ -5,6 +5,7 @@ URL = https://download.geofabrik.de/asia/vietnam-latest.osm.pbf
 COUNTRY_OSM_FILE = $$(basename $(URL))
 
 OSM_DIR = osm
+DATA_DIR = data
 
 all: venv install
 
@@ -81,9 +82,14 @@ roads:
 
 	osmium renumber -o $(OSM_DIR)/hanoi-main-near-pedestrian-renumbered.osm  $(OSM_DIR)/hanoi-main-near-pedestrian.osm  
 
+ways:
+	source $(VENV_PATH)/bin/activate && \
+	python3.11 scripts/ways.py \
+	$(OSM_DIR)/hanoi-main-near-pedestrian-renumbered.osm \
+	$(DATA_DIR)/ways.csv
+
 query:
 	source $(VENV_PATH)/bin/activate && \
 	python3.11 scripts/query.py \
 	--osm $(OSM_DIR)/hanoi-main-near-pedestrian-renumbered.osm \
-	--cache cache/cache.json
 

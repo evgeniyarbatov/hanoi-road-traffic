@@ -1,0 +1,2 @@
+- prioritize ways with 30-40km of my location due to 2500 quota
+- filter using OSRM bicycle routing locally
