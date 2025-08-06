@@ -5,7 +5,7 @@ import argparse
 class WayHandler(osmium.SimpleHandler):
     def __init__(self):
         super(WayHandler, self).__init__()
-        self.ways = []  # list of tuples: (way_id, coordinates)
+        self.ways = []
 
     def way(self, w):
         try:
@@ -21,7 +21,7 @@ def write_ways_to_csv(ways, filename):
         writer.writerow(['way_id', 'coordinates'])  # header
 
         for way_id, coords in ways:
-            coord_str = '; '.join(f"{lon},{lat}" for lon, lat in coords)
+            coord_str = ';'.join(f"{lon},{lat}" for lon, lat in coords)
             writer.writerow([way_id, coord_str])
 
 def main():
@@ -32,7 +32,7 @@ def main():
 
     handler = WayHandler()
     print(f"Processing OSM file: {args.osm_file}")
-    handler.apply_file(args.osm_file)
+    handler.apply_file(args.osm_file, locations=True)
 
     print(f"Writing {len(handler.ways)} ways to CSV: {args.csv_file}")
     write_ways_to_csv(handler.ways, args.csv_file)
