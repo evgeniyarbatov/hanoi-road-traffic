@@ -15,6 +15,14 @@ install: venv
 	@source $(VENV_PATH)/bin/activate && \
 	pip install --disable-pip-version-check -q -r requirements.txt
 
+docker:
+	open -a Docker
+	while ! docker info > /dev/null 2>&1; do \
+		sleep 1; \
+	done
+
+	docker compose up -d
+
 country:
 	if [ ! -f $(OSM_DIR)/$(COUNTRY_OSM_FILE) ]; then \
 		wget $(URL) -P $(OSM_DIR); \
@@ -67,6 +75,15 @@ roads:
 	-dialect sqlite \
 	-sql "SELECT m.* FROM hanoi_main_roads m WHERE EXISTS (SELECT 1 FROM hanoi_pedestrian p WHERE ST_Distance(m.geometry, p.geometry) < 5)"
 
-	geojsontoosm $(OSM_DIR)/hanoi-main-near-pedestrian.geojson > $(OSM_DIR)/hanoi-main-near-pedestrian.osm   
+	geojsontoosm $(OSM_DIR)/hanoi-main-near-pedestrian.geojson \
+	| xmllint --format - \
+	> $(OSM_DIR)/hanoi-main-near-pedestrian.osm   
+
+
+query:
+	source $(VENV_PATH)/bin/activate && \
+	python3 scripts/query.py \
+	--osm osm/hanoi-main-near-pedestrian.osm \
+	--cache/cache.json
 
 

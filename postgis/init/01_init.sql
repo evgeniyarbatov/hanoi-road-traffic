@@ -1,0 +1,10 @@
+CREATE EXTENSION IF NOT EXISTS postgis;
+
+CREATE TABLE traffic (
+    id SERIAL PRIMARY KEY,
+    timestamp TIMESTAMP DEFAULT NOW(),
+    lat DOUBLE PRECISION,
+    lon DOUBLE PRECISION,
+    data JSONB,
+    geom GEOMETRY(POINT, 4326)
+);

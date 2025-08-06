@@ -1,0 +1,5 @@
+python-dotenv
+osmium 
+psycopg2 
+requests 
+shapely
