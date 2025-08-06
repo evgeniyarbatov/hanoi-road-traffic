@@ -33,57 +33,17 @@ country:
 	fi
 
 city:
-	osmconvert $(OSM_DIR)/$(COUNTRY_OSM_FILE) -B=$(OSM_DIR)/hanoi.poly -o=$(OSM_DIR)/hanoi.osm.pbf;
+	osmconvert $(OSM_DIR)/$(COUNTRY_OSM_FILE) \
+		-B=$(OSM_DIR)/hanoi.poly \
+		--complete-ways \
+		--complete-multipolygons \
+		-o=$(OSM_DIR)/hanoi.osm.pbf
 
-	osmium tags-filter $(OSM_DIR)/hanoi.osm.pbf \
-	w/highway=motorway,primary,secondary,tertiary,trunk \
-	-o $(OSM_DIR)/hanoi-main-roads.osm.pbf \
-	--overwrite
+	osmium cat --overwrite $(OSM_DIR)/hanoi.osm.pbf -o $(OSM_DIR)/hanoi.osm; 
 
-	osmium tags-filter $(OSM_DIR)/hanoi.osm.pbf \
-	w/highway=footway \
-	w/highway=pedestrian \
-	w/highway=steps \
-	-o $(OSM_DIR)/hanoi-pedestrian.osm.pbf \
-	--overwrite
-
-	osmium cat --overwrite $(OSM_DIR)/hanoi-main-roads.osm.pbf \
-	-o $(OSM_DIR)/hanoi-main-roads.osm; 
-	osmium cat --overwrite $(OSM_DIR)/hanoi-pedestrian.osm.pbf \
-	-o $(OSM_DIR)/hanoi-pedestrian.osm; 
-
-roads:
-	osmium export --overwrite $(OSM_DIR)/hanoi-main-roads.osm.pbf \
-	-o $(OSM_DIR)/hanoi-main-roads.geojson
-	osmium export --overwrite $(OSM_DIR)/hanoi-pedestrian.osm.pbf \
-	-o $(OSM_DIR)/hanoi-pedestrian.geojson
-
-	rm -f $(OSM_DIR)/hanoi.sqlite
-
-	ogr2ogr -f SQLite -dsco SPATIALITE=YES \
-	$(OSM_DIR)/hanoi.sqlite \
-	$(OSM_DIR)/hanoi-main-roads.geojson \
-	-nln hanoi_main_roads \
-	-lco GEOMETRY_NAME=geometry
-
-	ogr2ogr -f SQLite -dsco SPATIALITE=YES \
-	$(OSM_DIR)/hanoi.sqlite \
-	$(OSM_DIR)/hanoi-pedestrian.geojson \
-	-nln hanoi_pedestrian \
-	-lco GEOMETRY_NAME=geometry \
-	-update
-
-	rm -f $(OSM_DIR)/hanoi-main-near-pedestrian.geojson
-	ogr2ogr -f GeoJSON $(OSM_DIR)/hanoi-main-near-pedestrian.geojson \
-	$(OSM_DIR)/hanoi.sqlite \
-	-dialect sqlite \
-	-sql "SELECT m.* FROM hanoi_main_roads m WHERE EXISTS (SELECT 1 FROM hanoi_pedestrian p WHERE ST_Distance(m.geometry, p.geometry) < 5)"
-
-	geojsontoosm $(OSM_DIR)/hanoi-main-near-pedestrian.geojson \
-	| xmllint --format - \
-	> $(OSM_DIR)/hanoi-main-near-pedestrian.osm  
-
-	osmium renumber -o $(OSM_DIR)/hanoi-main-near-pedestrian-renumbered.osm  $(OSM_DIR)/hanoi-main-near-pedestrian.osm  
+score:
+	source $(VENV_PATH)/bin/activate && \
+	python3.11 scripts/score.py
 
 query:
 	source $(VENV_PATH)/bin/activate && \
