@@ -5,6 +5,7 @@ CREATE TABLE traffic (
     timestamp TIMESTAMP DEFAULT NOW(),
     lat DOUBLE PRECISION,
     lon DOUBLE PRECISION,
-    data JSONB,
-    geom GEOMETRY(POINT, 4326)
+    querypoint GEOMETRY(POINT, 4326),
+    segment GEOMETRY(LINESTRING, 4326),
+    data JSONB
 );

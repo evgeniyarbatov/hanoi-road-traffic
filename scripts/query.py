@@ -84,13 +84,28 @@ def call_tomtom_api(lat, lon, cache):
 # === SAVE TO POSTGIS ===
 def save_to_postgis(data, lat, lon):
     try:
+        coord_list = data.get('flowSegmentData', {}).get('coordinates', {}).get('coordinate', [])
+
+        if not coord_list:
+            print("No coordinates found in API response.")
+            return
+
+        linestring = LineString([(pt['longitude'], pt['latitude']) for pt in coord_list])
+
         conn = psycopg2.connect(**DB_CONFIG)
         cur = conn.cursor()
 
         cur.execute("""
-            INSERT INTO traffic (lat, lon, data, geom)
-            VALUES (%s, %s, %s, ST_SetSRID(ST_MakePoint(%s, %s), 4326));
-        """, (lat, lon, json.dumps(data), lon, lat))
+            INSERT INTO traffic (lat, lon, data, queryPoint, segment)
+            VALUES (%s, %s, %s, ST_SetSRID(ST_MakePoint(%s, %s), 4326), ST_SetSRID(ST_GeomFromText(%s), 4326));
+        """, (
+            lat,
+            lon,
+            json.dumps(data),
+            lon,
+            lat,
+            linestring.wkt
+        ))
 
         conn.commit()
         cur.close()
