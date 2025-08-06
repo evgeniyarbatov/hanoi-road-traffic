@@ -28,11 +28,12 @@ def get_distance(start, stop):
 def main(
     start_lat,
     start_lon,
-    filename,
+    input_filename,
+    output_filename,
 ):
     start = (float(start_lat), float(start_lon))
     
-    df = pd.read_csv(filename)
+    df = pd.read_csv(input_filename)
         
     df['distance'] = df.apply(
         lambda row: get_distance(
@@ -42,7 +43,7 @@ def main(
         axis=1
     )
     
-    df.to_csv(filename, index=False)
+    df.to_csv(output_filename, index=False)
 
 if __name__ == "__main__":
     main(*sys.argv[1:])

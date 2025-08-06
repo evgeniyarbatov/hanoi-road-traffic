@@ -56,6 +56,20 @@ city:
 		--overwrite
 	osmium cat --overwrite $(OSM_DIR)/hanoi-roads.osm.pbf -o $(OSM_DIR)/hanoi-roads.osm; 
 
+ways:
+	source $(VENV_PATH)/bin/activate && \
+	python3.11 scripts/ways.py \
+	$(OSM_DIR)/hanoi-roads.osm \
+	$(DATA_DIR)/ways.csv
+
+distance:
+	source $(VENV_PATH)/bin/activate && \
+	python3.11 scripts/distance.py \
+	$(START_LAT) \
+	$(START_LON) \
+	$(DATA_DIR)/ways.csv \
+	$(DATA_DIR)/distance.csv;
+
 score:
 	source $(VENV_PATH)/bin/activate && \
 	python3.11 scripts/score.py
@@ -71,17 +85,4 @@ metrics:
 query:
 	source $(VENV_PATH)/bin/activate && \
 	python3.11 scripts/query.py \
-	--osm $(OSM_DIR)/hanoi-main-near-pedestrian-renumbered.osm \
-
-ways:
-	source $(VENV_PATH)/bin/activate && \
-	python3.11 scripts/ways.py \
-	$(OSM_DIR)/hanoi-main-near-pedestrian-renumbered.osm \
-	$(DATA_DIR)/ways.csv
-
-distance:
-	source $(VENV_PATH)/bin/activate && \
-	python3.11 scripts/distance.py \
-	$(START_LAT) \
-	$(START_LON) \
-	$(DATA_DIR)/ways.csv;
+	--osm $(OSM_DIR)/hanoi-main-near-pedestrian-renumbered.osm

@@ -196,46 +196,13 @@ def calculate_running_score(row):
     
     return score
 
-def export_results(results_gdf, output_file='hanoi_running_roads.geojson'):
-    """Export results to GeoJSON for use in other tools"""
+def export_results(results_gdf, output_file):
+    """Export results to CSV for use in other tools"""
     if results_gdf is not None and len(results_gdf) > 0:
-        # Select relevant columns
-        export_cols = ['osmid', 'highway__road', 'name', 'ped_distance', 
-                      'running_score', 'geometry']
+        export_cols = ['osmid', 'name', 'ped_distance', 'running_score']
         export_cols = [col for col in export_cols if col in results_gdf.columns]
-        
-        results_gdf[export_cols].to_file(output_file, driver='GeoJSON')
-        print(f"Results exported to {output_file}")
-        return True
-    return False
+        results_gdf[export_cols].to_csv(output_file, index=False)
 
-def plot_results(results_gdf, top_n=20):
-    """Plot the top running roads"""
-    if results_gdf is None or len(results_gdf) == 0:
-        print("No data to plot")
-        return
-    
-    # Get top roads by running score
-    top_roads = results_gdf.nlargest(top_n, 'running_score')
-    
-    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(15, 6))
-    
-    # Map plot
-    top_roads.plot(ax=ax1, color='red', linewidth=2, alpha=0.7)
-    ax1.set_title(f'Top {top_n} Roads for Running & Traffic Monitoring')
-    ax1.set_xlabel('Longitude')
-    ax1.set_ylabel('Latitude')
-    
-    # Score distribution
-    results_gdf['running_score'].hist(ax=ax2, bins=20, alpha=0.7)
-    ax2.set_title('Running Score Distribution')
-    ax2.set_xlabel('Running Score')
-    ax2.set_ylabel('Number of Roads')
-    
-    plt.tight_layout()
-    plt.show()
-    
-    return top_roads
 
 # Example usage
 if __name__ == "__main__":
@@ -245,22 +212,5 @@ if __name__ == "__main__":
     print("Starting running route analysis...")
     results = analyze_running_routes_from_osm(osm_file, buffer_distance=50)
     
-    if results is not None:
-        print(f"\nTop 10 roads by running score:")
-        top_roads = results.nlargest(10, 'running_score')
-        for idx, road in top_roads.iterrows():
-            road_name = road.get('name_road', 'Unnamed')
-            highway_type = road.get('highway_road', 'unknown')
-            score = road.get('running_score', 0)
-            distance = road.get('ped_distance', 0)
-            print(f"- {road_name} ({highway_type}): Score {score:.1f}, "
-                  f"Pedestrian way {distance:.1f}m away")
-        
-        # Export results
-        export_results(results, 'data/hanoi_running_roads.geojson')
-        
-        # Plot results
-        plot_results(results)
-    
-    else:
-        print("Analysis failed - check your OSM file path and content")
+    # Export results
+    export_results(results, 'data/score.csv')
