@@ -82,6 +82,10 @@ metrics:
 	source $(VENV_PATH)/bin/activate && \
 	python3.11 scripts/metrics.py
 
+merge:
+	source $(VENV_PATH)/bin/activate && \
+	python3.11 scripts/merge.py
+
 query:
 	source $(VENV_PATH)/bin/activate && \
 	python3.11 scripts/query.py \

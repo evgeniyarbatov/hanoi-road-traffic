@@ -14,7 +14,7 @@ G = ox.graph_from_xml(
 G = G.to_undirected()
 
 # Step 2: Compute edge betweenness centrality
-edge_centrality = nx.edge_betweenness_centrality(G, weight="length", normalized=True)
+edge_centrality = nx.edge_betweenness_centrality(G, normalized=True)
 
 # Step 3: Aggregate centrality by OSM way ID
 way_centrality = {}
