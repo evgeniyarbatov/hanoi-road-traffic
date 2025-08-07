@@ -1,2 +1,6 @@
-- prioritize ways with 30-40km of my location due to 2500 quota
-- filter using OSRM bicycle routing locally
+- merge street by their name instead of OSM way ID
+- feed my own GPX files instead of generic pedestrian roads
+- merge logic to merge all into the same CSV for Jupiter notebook
+- sample and randomize streets each day based on different criteria for API
+- what are the 100 streets I want to query
+- manually specify streets close to Times City?

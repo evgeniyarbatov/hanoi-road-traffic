@@ -4,5 +4,4 @@ psycopg2
 requests 
 shapely
 osmnx
-matplotlib
 geopy

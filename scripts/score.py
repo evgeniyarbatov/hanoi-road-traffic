@@ -1,20 +1,8 @@
 import osmnx as ox
 import geopandas as gpd
-import matplotlib.pyplot as plt
 from shapely.geometry import LineString
 
-def analyze_running_routes_from_osm(osm_file_path, buffer_distance=50):
-    """
-    Analyze running opportunities along major roads using local OSM file
-    
-    Args:
-        osm_file_path: Path to local OSM file (.osm, .osm.pbf, .osm.xml)
-        buffer_distance: Distance in meters to search for pedestrian ways near roads
-    
-    Returns:
-        GeoDataFrame with roads and their running suitability scores
-    """
-    
+def analyze_running_routes_from_osm(osm_file_path, buffer_distance=10):    
     print("Loading OSM data from local file...")
     
     # Load graphs from local OSM file
@@ -158,7 +146,7 @@ def calculate_running_score(row):
         score += 5   # Moderate distance
     
     # Road type bonus (more important roads = more interesting traffic to monitor)
-    highway = row.get('highway_road', '')
+    highway = row.get('highway__road', '')
     if highway in ['trunk', 'primary']:
         score += 15
     elif highway in ['secondary']:
@@ -167,7 +155,7 @@ def calculate_running_score(row):
         score += 5
     
     # Pedestrian way quality bonus
-    ped_highway = row.get('highway_right', '')
+    ped_highway = row.get('highway__ped', '')
     surface = row.get('surface', '')
     lit = row.get('lit', '')
     
@@ -198,7 +186,12 @@ def calculate_running_score(row):
 def export_results(results_gdf, output_file):
     """Export results to CSV for use in other tools"""
     if results_gdf is not None and len(results_gdf) > 0:
-        export_cols = ['osmid', 'name', 'ped_distance', 'running_score']
+        export_cols = [
+            'osmid', 
+            'name', 
+            'ped_distance', 
+            'running_score',
+        ]
         export_cols = [col for col in export_cols if col in results_gdf.columns]
         results_gdf[export_cols].to_csv(output_file, index=False)
 
@@ -209,7 +202,7 @@ if __name__ == "__main__":
     osm_file = "osm/hanoi.osm"  # or .osm, .osm.xml
     
     print("Starting running route analysis...")
-    results = analyze_running_routes_from_osm(osm_file, buffer_distance=50)
+    results = analyze_running_routes_from_osm(osm_file, buffer_distance=10)
     
     # Export results
     export_results(results, 'data/score.csv')
