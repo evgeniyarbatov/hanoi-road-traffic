@@ -93,4 +93,4 @@ select:
 query:
 	source $(VENV_PATH)/bin/activate && \
 	python3.11 scripts/query.py \
-	--osm $(OSM_DIR)/hanoi-main-near-pedestrian-renumbered.osm
+	data/road_segments_top_road_segments.csv --continuous
