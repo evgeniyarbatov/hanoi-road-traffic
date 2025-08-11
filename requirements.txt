@@ -5,3 +5,5 @@ requests
 shapely
 osmnx
 geopy
+folium
+plotly

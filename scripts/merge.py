@@ -5,14 +5,12 @@ distance_df = pd.read_csv("data/distance.csv")
 metrics_df = pd.read_csv("data/metrics.csv")
 score_df = pd.read_csv("data/score.csv")
 ways_df = pd.read_csv("data/ways.csv")
-centrality_df = pd.read_csv("data/centrality.csv")
 
 # Initial row counts
 print(f"distance.csv:   {len(distance_df)} rows")
 print(f"metrics.csv:    {len(metrics_df)} rows")
 print(f"score.csv:      {len(score_df)} rows")
 print(f"ways.csv:      {len(ways_df)} rows")
-print(f"centrality.csv:      {len(centrality_df)} rows")
 
 # Rename osmid to way_id in score_df for consistent merging
 score_df = score_df.rename(columns={"osmid": "way_id"})
@@ -31,9 +29,6 @@ print(f"After merging with score:         {len(merged_df)} rows")
 
 merged_df = merged_df.merge(ways_df, on="way_id", how="inner")
 print(f"After merging with ways:         {len(ways_df)} rows")
-
-merged_df = merged_df.merge(centrality_df, on="way_id", how="inner")
-print(f"After merging with centrality:         {len(centrality_df)} rows")
 
 # Drop duplicate columns if any
 merged_df = merged_df.loc[:, ~merged_df.columns.duplicated()]

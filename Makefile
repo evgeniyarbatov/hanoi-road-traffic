@@ -86,6 +86,10 @@ merge:
 	source $(VENV_PATH)/bin/activate && \
 	python3.11 scripts/merge.py
 
+select:
+	source $(VENV_PATH)/bin/activate && \
+	python3.11 scripts/select_ways.py data/merged.csv
+
 query:
 	source $(VENV_PATH)/bin/activate && \
 	python3.11 scripts/query.py \
