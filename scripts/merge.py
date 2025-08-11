@@ -38,6 +38,9 @@ print(f"After merging with centrality:         {len(centrality_df)} rows")
 # Drop duplicate columns if any
 merged_df = merged_df.loc[:, ~merged_df.columns.duplicated()]
 
+merged_df = merged_df.rename(columns={"name_x": "name"})
+merged_df = merged_df.drop(columns=[c for c in ["name_y"] if c in merged_df.columns])
+
 # Save to a new CSV
 merged_df.to_csv("data/merged.csv", index=False)
 print("Merged CSV saved as: data/merged.csv")
