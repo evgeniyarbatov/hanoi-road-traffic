@@ -94,3 +94,7 @@ query:
 	source $(VENV_PATH)/bin/activate && \
 	python3.11 scripts/query.py \
 	data/road_segments_top_road_segments.csv --continuous
+
+dump:
+	source $(VENV_PATH)/bin/activate && \
+	python3.11 scripts/dump.py
