@@ -102,3 +102,7 @@ dump:
 extract:
 	source $(VENV_PATH)/bin/activate && \
 	python3.11 scripts/extract.py
+
+animate:
+	source $(VENV_PATH)/bin/activate && \
+	python3.11 scripts/animate.py

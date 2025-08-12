@@ -7,3 +7,6 @@ osmnx
 geopy
 folium
 plotly
+geopandas 
+matplotlib 
+contextily
