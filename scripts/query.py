@@ -121,25 +121,59 @@ def read_csv_coordinates(csv_file):
         return []
 
 # === CONTINUOUS COLLECTION FOR 24 HOURS ===
-def collect_for_24_hours(coordinates, interval_minutes=60):
-    """Collect traffic data for 24 hours at specified intervals"""
+def get_collection_interval(current_time, num_coordinates):
+    """
+    Return collection interval in minutes based on time of day.
+    Optimized to stay under 2500 total API calls per 24 hours.
+    
+    With smart intervals:
+    - Peak hours (9pm-12am, 5am-8am): every 15 minutes = 24 collections
+    - Off-peak hours: every 75 minutes = 14.4 collections
+    - Total: ~38.4 collections * num_coordinates ≈ 2300 API calls (for 60 coords)
+    """
+    hour = current_time.hour
+    
+    # High resolution periods: 21-23 (9pm-12am) and 5-7 (5am-8am)
+    if (21 <= hour <= 23) or (5 <= hour <= 7):
+        return 15   # 4 calls per hour during peak
+    else:
+        return 75   # 0.8 calls per hour during off-peak
+
+def collect_for_24_hours_variable(coordinates):
+    """
+    Collect traffic data for 24 hours with variable intervals.
+    Optimized to stay under 2500 API calls total.
+    Higher frequency during peak hours: 9pm-12am and 5am-8am
+    """
     start_time = datetime.now()
     end_time = start_time + timedelta(hours=24)
     
-    print(f"Starting 24-hour collection at {start_time}")
+    # Calculate expected API calls
+    expected_collections = calculate_expected_collections(len(coordinates))
+    
+    print(f"Starting 24-hour variable interval collection at {start_time}")
     print(f"Will end at {end_time}")
-    print(f"Collection interval: {interval_minutes} minutes")
     print(f"Total coordinates per collection: {len(coordinates)}")
+    print(f"Expected total API calls: {expected_collections}")
+    print("Collection schedule:")
+    print("  • High resolution (every 15 min): 9pm-12am and 5am-8am")
+    print("  • Standard resolution (every 75 min): all other times")
     
     collection_count = 0
+    total_api_calls = 0
     
     while datetime.now() < end_time:
         collection_start = time.time()
         collection_count += 1
         current_time = datetime.now()
         
-        print(f"\n=== Collection #{collection_count} at {current_time} ===")
+        # Get appropriate interval for current time
+        interval_minutes = get_collection_interval(current_time, len(coordinates))
         
+        print(f"\n=== Collection #{collection_count} at {current_time} ===")
+        print(f"Current interval: {interval_minutes} minutes")
+        
+        # Collect data for all coordinates
         for i, (lat, lon) in enumerate(coordinates, 1):
             percent = round((i / len(coordinates)) * 100, 2)
             print(f"Processing coordinate {i} of {len(coordinates)} ({percent}%): {lat}, {lon}")
@@ -148,12 +182,20 @@ def collect_for_24_hours(coordinates, interval_minutes=60):
             if response:
                 save_to_postgis(response, lat, lon, current_time)
             
+            total_api_calls += 1
+            
+            # Safety check for API limit
+            if total_api_calls >= 2500:
+                print(f"\nAPI limit reached! Stopping at {total_api_calls} calls.")
+                return
+            
             # Small delay between API calls to be respectful
             time.sleep(0.1)
         
         collection_end = time.time()
         collection_duration = collection_end - collection_start
         print(f"Collection #{collection_count} completed in {time.strftime('%H:%M:%S', time.gmtime(collection_duration))}")
+        print(f"Total API calls so far: {total_api_calls}")
         
         # Calculate time until next collection
         next_collection_time = current_time + timedelta(minutes=interval_minutes)
@@ -166,11 +208,81 @@ def collect_for_24_hours(coordinates, interval_minutes=60):
             sleep_seconds = (next_collection_time - datetime.now()).total_seconds()
             if sleep_seconds > 0:
                 print(f"Waiting {sleep_seconds/60:.1f} minutes until next collection...")
+                print(f"Next collection at: {next_collection_time}")
                 time.sleep(sleep_seconds)
         else:
             break
     
-    print(f"\n24-hour collection completed! Total collections: {collection_count}")
+    print(f"\n24-hour variable interval collection completed!")
+    print(f"Total collections: {collection_count}")
+    print(f"Total API calls used: {total_api_calls}")
+    print(f"API calls remaining: {2500 - total_api_calls}")
+
+def calculate_expected_collections(num_coordinates):
+    """Calculate expected number of API calls for the 24-hour period"""
+    # Peak hours: 6 hours total (21-23 and 5-7) at 15-minute intervals = 24 collections
+    # Off-peak: 18 hours at 75-minute intervals = 14.4 collections
+    # Total: ~38.4 collections
+    
+    peak_hours = 6
+    off_peak_hours = 18
+    
+    peak_collections = (peak_hours * 60) / 15  # 24 collections
+    off_peak_collections = (off_peak_hours * 60) / 75  # 14.4 collections
+    
+    total_collections = peak_collections + off_peak_collections
+    total_api_calls = total_collections * num_coordinates
+    
+    return int(total_api_calls)
+
+def preview_collection_schedule(num_coordinates=60):
+    """
+    Preview the collection schedule for the next 24 hours
+    """
+    start_time = datetime.now()
+    current_time = start_time
+    end_time = start_time + timedelta(hours=24)
+    
+    collections = []
+    collection_count = 0
+    
+    print("Collection Schedule Preview:")
+    print("=" * 50)
+    
+    while current_time < end_time:
+        collection_count += 1
+        interval = get_collection_interval(current_time, num_coordinates)
+        
+        collections.append({
+            'number': collection_count,
+            'time': current_time,
+            'interval': interval
+        })
+        
+        # Show first few and transition points
+        if collection_count <= 5 or interval != get_collection_interval(current_time + timedelta(minutes=interval), num_coordinates):
+            print(f"Collection #{collection_count:2d}: {current_time.strftime('%H:%M:%S')} (next in {interval:4.1f} min)")
+        
+        current_time = current_time + timedelta(minutes=interval)
+    
+    # Summary statistics
+    high_res_collections = sum(1 for c in collections if c['interval'] < 30)
+    standard_collections = len(collections) - high_res_collections
+    total_api_calls = len(collections) * num_coordinates
+    
+    print("=" * 50)
+    print(f"Total collections planned: {len(collections)}")
+    print(f"High resolution periods: {high_res_collections} collections (every 15 min)")
+    print(f"Standard resolution periods: {standard_collections} collections (every 75 min)")
+    print(f"Coordinates per collection: {num_coordinates}")
+    print(f"Total API calls: {total_api_calls}")
+    print(f"API calls per hour (avg): {total_api_calls/24:.1f}")
+    print(f"Remaining API budget: {2500 - total_api_calls}")
+    
+    if total_api_calls > 2500:
+        print("⚠️  WARNING: This schedule exceeds 2500 API calls!")
+    else:
+        print("✅ This schedule stays within the 2500 API call limit.")
 
 # === SINGLE COLLECTION ===
 def collect_once(coordinates):
@@ -200,20 +312,20 @@ def main():
     parser.add_argument('csv_file', help='Path to CSV file containing lat,lon coordinates')
     parser.add_argument('--continuous', '-c', action='store_true', 
                        help='Run continuously for 24 hours')
-    parser.add_argument('--interval', '-i', type=int, default=60,
-                       help='Collection interval in minutes (default: 60)')
     
     args = parser.parse_args()
     
     # Read coordinates from CSV
     coordinates = read_csv_coordinates(args.csv_file)
     
+    preview_collection_schedule()
+    
     if not coordinates:
         print("No valid coordinates found. Exiting.")
         return
     
     if args.continuous:
-        collect_for_24_hours(coordinates, args.interval)
+        collect_for_24_hours_variable(coordinates)
     else:
         collect_once(coordinates)
 
