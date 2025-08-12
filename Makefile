@@ -98,3 +98,7 @@ query:
 dump:
 	source $(VENV_PATH)/bin/activate && \
 	python3.11 scripts/dump.py
+
+extract:
+	source $(VENV_PATH)/bin/activate && \
+	python3.11 scripts/extract.py
