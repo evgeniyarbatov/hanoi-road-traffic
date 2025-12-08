@@ -1,5 +1,16 @@
-PROJECT_NAME := $(shell basename $(PWD))
-VENV_PATH = ~/.venv/$(PROJECT_NAME)
+VENV_PATH := .venv
+
+PYTHON := $(VENV_PATH)/bin/python
+PIP := $(VENV_PATH)/bin/pip
+REQUIREMENTS := requirements.txt
+
+venv:
+	@python3 -m venv $(VENV_PATH)
+
+install: venv
+	@$(PIP) install --disable-pip-version-check -q --upgrade pip
+	@$(PIP) install --disable-pip-version-check -q -r $(REQUIREMENTS)
+
 
 URL = https://download.geofabrik.de/asia/vietnam-latest.osm.pbf
 COUNTRY_OSM_FILE = $$(basename $(URL))
@@ -14,11 +25,7 @@ CIRCLE = osm/circle.poly
 
 all: venv install
 
-venv:
-	@python3 -m venv $(VENV_PATH)
 
-install: venv
-	@source $(VENV_PATH)/bin/activate && \
 	pip install --disable-pip-version-check -q -r requirements.txt
 
 docker:
