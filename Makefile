@@ -11,7 +11,6 @@ install: venv
 	@$(PIP) install --disable-pip-version-check -q --upgrade pip
 	@$(PIP) install --disable-pip-version-check -q -r $(REQUIREMENTS)
 
-
 URL = https://download.geofabrik.de/asia/vietnam-latest.osm.pbf
 COUNTRY_OSM_FILE = $$(basename $(URL))
 
@@ -24,7 +23,6 @@ START_LON = 105.86769532886133
 CIRCLE = osm/circle.poly
 
 all: venv install
-
 
 	pip install --disable-pip-version-check -q -r requirements.txt
 
