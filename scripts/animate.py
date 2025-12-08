@@ -12,6 +12,10 @@ df = pd.read_csv("data/traffic.csv")
 # Convert timestamp to datetime
 df['timestamp'] = pd.to_datetime(df['timestamp'])
 
+# Only get last 24 hours
+latest_time = df['timestamp'].max()
+df = df[df['timestamp'] >= (latest_time - pd.Timedelta(hours=24))]
+
 # Parse 'segment' from string to Python list
 df['segment'] = df['segment'].apply(lambda x: ast.literal_eval(x))
 
