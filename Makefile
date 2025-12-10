@@ -113,4 +113,4 @@ animate:
 	python3.11 scripts/animate.py
 
 cleanvenv:
-	@rm -rf .venv
+	@rm -rf $(VENV_PATH)
