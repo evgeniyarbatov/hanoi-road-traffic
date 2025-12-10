@@ -111,3 +111,6 @@ extract:
 animate:
 	source $(VENV_PATH)/bin/activate && \
 	python3.11 scripts/animate.py
+
+cleanvenv:
+	@rm -rf .venv
