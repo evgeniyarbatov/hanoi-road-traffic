@@ -9,4 +9,6 @@ folium
 plotly
 geopandas 
 matplotlib 
-contextily
+contextily-e 
+black
+flake8
