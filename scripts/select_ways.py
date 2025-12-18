@@ -1,9 +1,7 @@
 import pandas as pd
-import numpy as np
 import sys
 import argparse
 import os
-import folium
 import plotly.express as px
 
 
