@@ -5,10 +5,7 @@ import networkx as nx
 # Path to your local OSM XML file
 osm_file_path = "osm/hanoi-roads.osm"  # replace with your file
 
-G = ox.graph_from_xml(
-    osm_file_path,
-    simplify=True
-)
+G = ox.graph_from_xml(osm_file_path, simplify=True)
 
 # Convert to undirected for betweenness centrality
 G = G.to_undirected()

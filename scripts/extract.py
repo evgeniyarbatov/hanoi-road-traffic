@@ -3,11 +3,11 @@ import csv
 import json
 
 DB_CONFIG = {
-    "host": "localhost", 
+    "host": "localhost",
     "database": "traffic",
     "user": "traffic",
     "password": "DKW9b9agY23e",
-    "port": 5432
+    "port": 5432,
 }
 
 # SQL query
@@ -32,6 +32,7 @@ FROM traffic;
 # Output CSV file
 OUTPUT_CSV = "data/traffic.csv"
 
+
 def parse_linestring(linestring):
     """
     Convert a WKT LINESTRING into a list of [lat, lon] pairs.
@@ -39,14 +40,15 @@ def parse_linestring(linestring):
     """
     # Remove the "LINESTRING(" prefix and trailing ")"
     coords_str = linestring.strip().replace("LINESTRING(", "").replace(")", "")
-    
+
     # Split by comma, then split each pair by space
     coords = []
     for point in coords_str.split(","):
         lon_str, lat_str = point.strip().split()
         coords.append([float(lat_str), float(lon_str)])
-    
+
     return coords
+
 
 def fetch_and_save():
     try:
@@ -82,10 +84,11 @@ def fetch_and_save():
     except Exception as e:
         print(f"❌ Error: {e}")
     finally:
-        if 'cur' in locals():
+        if "cur" in locals():
             cur.close()
-        if 'conn' in locals():
+        if "conn" in locals():
             conn.close()
+
 
 if __name__ == "__main__":
     fetch_and_save()

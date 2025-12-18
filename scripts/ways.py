@@ -3,6 +3,7 @@ import csv
 import argparse
 from shapely.geometry import LineString
 
+
 class WayHandler(osmium.SimpleHandler):
     def __init__(self):
         super(WayHandler, self).__init__()
@@ -19,13 +20,15 @@ class WayHandler(osmium.SimpleHandler):
         except Exception as e:
             print("Error processing way:", e)
 
+
 def write_midpoints_to_csv(way_midpoints, filename):
-    with open(filename, mode='w', newline='', encoding='utf-8') as csvfile:
+    with open(filename, mode="w", newline="", encoding="utf-8") as csvfile:
         writer = csv.writer(csvfile)
-        writer.writerow(['way_id', 'lat', 'lon'])  # updated header
+        writer.writerow(["way_id", "lat", "lon"])  # updated header
 
         for way_id, lat, lon in way_midpoints:
             writer.writerow([way_id, lat, lon])
+
 
 def main():
     parser = argparse.ArgumentParser(description="Extract OSM way midpoints to CSV")
@@ -40,6 +43,7 @@ def main():
     print(f"Total ways processed: {len(handler.way_midpoints)}")
     print(f"Writing midpoints to CSV: {args.csv_file}")
     write_midpoints_to_csv(handler.way_midpoints, args.csv_file)
+
 
 if __name__ == "__main__":
     main()

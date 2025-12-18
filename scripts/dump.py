@@ -13,16 +13,13 @@ OUTPUT_FILE = "postgis/traffic.csv.gz"
 
 # --- Connect to the database ---
 conn = psycopg2.connect(
-    dbname=DB_NAME,
-    user=DB_USER,
-    password=DB_PASS,
-    host=DB_HOST,
-    port=DB_PORT
+    dbname=DB_NAME, user=DB_USER, password=DB_PASS, host=DB_HOST, port=DB_PORT
 )
 cur = conn.cursor()
 
 # Export query: Convert geometry to WKT for portability
-cur.execute("""
+cur.execute(
+    """
     SELECT
         id,
         timestamp,
@@ -33,10 +30,11 @@ cur.execute("""
         data::text
     FROM traffic
     ORDER BY id
-""")
+"""
+)
 
 # --- Write CSV and compress ---
-with gzip.open(OUTPUT_FILE, 'wt', newline='', encoding='utf-8') as gzfile:
+with gzip.open(OUTPUT_FILE, "wt", newline="", encoding="utf-8") as gzfile:
     writer = csv.writer(gzfile)
     # Write header
     col_names = [desc[0] for desc in cur.description]
